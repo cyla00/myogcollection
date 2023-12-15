@@ -11,7 +11,7 @@ use axum::{
 #[allow(unused_imports)]
 use serde::{Deserialize, Serialize};
 use dotenv::dotenv;
-
+use std::sync::Arc;
 #[allow(unused_imports)]
 use std::env;
 
@@ -25,20 +25,19 @@ async fn main() -> Result<(), Error> {
     let _db_host = env::var("DB_HOST").unwrap();
     let _db_port = env::var("DB_PORT").unwrap();
 
-    let (client, connection) = 
-        tokio_postgres::connect("host=localhost user=postgres password=postgres", NoTls).await.unwrap();
+    let  (db, connection) = 
+        tokio_postgres::connect(format!("postgresql://{}:{}@{}/{}", _db_user, _db_pwd, _db_host, _db_name).as_str(), NoTls).await.unwrap();
 
     tokio::spawn(async move {
         if let Err(e) = connection.await {
             eprintln!("connection error: {}", e);
         }
     });
-
-    
     
     tracing_subscriber::fmt::init();
     let app = Router::new()
-        .route("/", get(routes::get_index::index));
+        .route("/", get(routes::get_index::index))
+        .with_state(Arc::new(db));
 
     let listener = tokio::net::TcpListener::bind("0.0.0.0:3000").await.unwrap();
     axum::serve(listener, app).await.unwrap();
