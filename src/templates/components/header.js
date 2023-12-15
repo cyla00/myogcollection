@@ -5,7 +5,7 @@ class customHeader extends HTMLElement {
 
     connectedCallback(){
         this.innerHTML = `
-            <header>
+            <header class="bg">
                 <h1 class="text-blue">header</h1>
                 <button hx-get="/clicked">get</button>
             </header>
