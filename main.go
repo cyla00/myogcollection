@@ -7,6 +7,7 @@ import (
 	"myog/templates/signup"
 	"net/http"
 	"os"
+	"fmt"
 
 	"github.com/a-h/templ"
 	"github.com/joho/godotenv"
@@ -32,5 +33,6 @@ func main() {
 	// if build_err != nil {
 	// 	log.Fatal(build_err)
 	// }
+	fmt.Printf("running on localhost:%s", os.Getenv("SERVER_PORT"))
 	log.Fatal(http.ListenAndServe(":"+os.Getenv("SERVER_PORT"), nil))
 }
