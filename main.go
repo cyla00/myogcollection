@@ -29,10 +29,10 @@ func main() {
 	// if db_conn_err != nil {
 	// 	log.Fatal(db_conn_err)
 	// }
-	// build_err := database.Build(db)
-	// if build_err != nil {
-	// 	log.Fatal(build_err)
-	// }
+	build_err := database.Build(db)
+	if build_err != nil {
+		log.Fatal(build_err)
+	}
 	fmt.Printf("running on localhost:%s", os.Getenv("SERVER_PORT"))
 	log.Fatal(http.ListenAndServe(":"+os.Getenv("SERVER_PORT"), nil))
 }
