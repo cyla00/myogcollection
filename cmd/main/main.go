@@ -26,14 +26,11 @@ func main() {
 	http.Handle("/signup", templ.Handler(signup.SignupPage()))
 	http.Handle("/login", templ.Handler(login.LoginPage()))
 
-	db, db_conn_err := database.PsqlConnection(os.Getenv("DB_USER"), os.Getenv("DB_PWD"), os.Getenv("DB_NAME"), os.Getenv("DB_HOST"))
+	_, db_conn_err := database.PsqlConnection(os.Getenv("DB_USER"), os.Getenv("DB_PWD"), os.Getenv("DB_NAME"), os.Getenv("DB_HOST"))
 	if db_conn_err != nil {
-		log.Fatal("db_conn_err")
+		log.Fatal(db_conn_err)
 	}
-	build_err := database.Build(db)
-	if build_err != nil {
-		log.Fatal("build_err")
-	}
+
 	fmt.Printf("running on localhost:%s", os.Getenv("SERVER_PORT"))
 	log.Fatal(http.ListenAndServe(":"+os.Getenv("SERVER_PORT"), nil))
 }

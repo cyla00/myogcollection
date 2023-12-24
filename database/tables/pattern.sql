@@ -1,7 +1,7 @@
-CREATE TABLE [IF NOT EXISTS] patterns (
-    id VARCHAR(50) PRIMARY KEY,
+CREATE TABLE IF NOT EXISTS patterns (
+    id VARCHAR(100) PRIMARY KEY,
     owner_id VARCHAR(100) NOT NULL,
-    _path VARCHAR(100) NOT NULL,
+    pattern_path VARCHAR(100) NOT NULL,
     tags BOOLEAN DEFAULT false NOT NULL,
-    createdAt DATETIME NULL,
+    created_at DATE NULL
 )
