@@ -10,3 +10,7 @@ type User struct {
 	createdAt time.Time
 	active    bool
 }
+
+func (user User) PasswordHash(passInput string) (string, error) {
+	return "string element", nil
+}

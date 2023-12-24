@@ -9,7 +9,6 @@ import (
 )
 
 func Build(db *sql.DB) error {
-
 	usr_table_err := db.QueryRow(`CREATE TABLE [IF NOT EXISTS] users (
 		id VARCHAR(50) PRIMARY KEY,
 		username VARCHAR(100) NOT NULL,
@@ -19,7 +18,7 @@ func Build(db *sql.DB) error {
 		active BOOLEAN DEFAULT false NOT NULL,
 	)`)
 	if usr_table_err != nil {
-		log.Fatal(usr_table_err)
+		log.Fatal("usr_table_err")
 		return errors.New("db user table creation error")
 	}
 
@@ -31,7 +30,7 @@ func Build(db *sql.DB) error {
 		createdAt DATETIME NULL,
 	)`)
 	if pattern_table_err != nil {
-		log.Fatal(pattern_table_err)
+		log.Fatal("pattern_table_err")
 		return errors.New("db patterns table creation error")
 	}
 	return nil
