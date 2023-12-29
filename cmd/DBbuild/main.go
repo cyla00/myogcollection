@@ -50,8 +50,8 @@ func main() {
 		id VARCHAR(100) PRIMARY KEY,
 		owner_id VARCHAR(100) NOT NULL,
 		pattern_id VARCHAR(100) NOT NULL,
-		rating FLOAT DEFAULT 0.0 NOT NULL,
-		created_at DATE NULL
+		comment VARCHAR(500) NOT NULL,
+		created_at DATE NOT NULL
 	)`)
 	if comments_table_err != nil {
 		fmt.Println("", comments_table_err.Err())

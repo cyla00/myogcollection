@@ -36,4 +36,6 @@ func main() {
 	if drop_comments_err != nil {
 		fmt.Println("", drop_comments_err.Err())
 	}
+
+	println("database destroyed")
 }
