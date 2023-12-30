@@ -27,7 +27,7 @@ func main() {
 		id VARCHAR(50) PRIMARY KEY,
 		username VARCHAR(100) NOT NULL,
 		email VARCHAR(100) NOT NULL,
-		password VARCHAR(500) NOT NULL,
+		user_password VARCHAR(500) NOT NULL,
 		created_at DATE NULL,
 		active BOOLEAN DEFAULT false NOT NULL
 	)`)
@@ -36,11 +36,16 @@ func main() {
 	}
 
 	pattern_table_err := db.QueryRow(`CREATE TABLE IF NOT EXISTS patterns (
-		id VARCHAR(50) PRIMARY KEY,
+		id VARCHAR(100) PRIMARY KEY,
 		owner_id VARCHAR(100) NOT NULL,
+		title VARCHAR(100) NOT NULL,
+		pattern_description VARCHAR(500) NOT NULL,
+		gallery_paths VARCHAR(100)[] NOT NULL,
 		pattern_path VARCHAR(100) NOT NULL,
-		tags BOOLEAN DEFAULT false NOT NULL,
-		created_at DATE NULL
+		materials VARCHAR(100)[] NOT NULL,
+		tools VARCHAR(100)[] NOT NULL,
+		category VARCHAR(100) NOT NULL,
+		created_at DATE NOT NULL
 	)`)
 	if pattern_table_err != nil {
 		fmt.Println("", pattern_table_err.Err())
