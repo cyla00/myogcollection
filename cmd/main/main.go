@@ -22,12 +22,12 @@ func main() {
 		log.Fatal("Error loading .env file")
 	}
 
+	http.Handle("/patterns/", http.StripPrefix("/", http.FileServer(http.Dir("./patterns"))))
+	http.Handle("/images/", http.StripPrefix("/", http.FileServer(http.Dir("./images"))))
+
 	http.Handle("/", templ.Handler(index.IndexPage()))
 	http.Handle("/signup", templ.Handler(signup.SignupPage()))
 	http.Handle("/login", templ.Handler(login.LoginPage()))
-
-	http.Handle("/patterns/", http.StripPrefix("/", http.FileServer(http.Dir("./patterns"))))
-	http.Handle("/images/", http.StripPrefix("/", http.FileServer(http.Dir("./images"))))
 
 	_, db_conn_err := database.PsqlConnection(os.Getenv("DB_USER"), os.Getenv("DB_PWD"), os.Getenv("DB_NAME"), os.Getenv("DB_HOST"))
 	if db_conn_err != nil {
