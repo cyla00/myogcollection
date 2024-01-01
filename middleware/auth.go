@@ -5,7 +5,7 @@ import (
 	"net/http"
 )
 
-func MiddlewareOne(next http.Handler) http.Handler {
+func AuthMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(res http.ResponseWriter, req *http.Request) {
 		// Code that run before
 		log.Print("Executing middlewareOne before")
