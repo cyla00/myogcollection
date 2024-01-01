@@ -2,10 +2,9 @@ package main
 
 import (
 	"fmt"
-	"html"
 	"log"
+	"myog/api"
 	"myog/database"
-	"myog/middleware"
 	"myog/templates/index"
 	"myog/templates/login"
 	"myog/templates/signup"
@@ -37,18 +36,14 @@ func main() {
 	http.Handle("/login", templ.Handler(login.LoginPage()))
 
 	// API
-	http.Handle("/api/"+os.Getenv("API_VERSION")+"/login", fooHandler)
-	http.Handle("/api/"+os.Getenv("API_VERSION")+"/registration", fooHandler)
-	http.Handle("/api/"+os.Getenv("API_VERSION")+"/upload-pattern", middleware.AuthMiddleware(fooHandler))
-	http.Handle("/api/"+os.Getenv("API_VERSION")+"/delete-pattern", middleware.AuthMiddleware(fooHandler))
-	http.Handle("/api/"+os.Getenv("API_VERSION")+"/modify-pattern", middleware.AuthMiddleware(fooHandler))
-	http.Handle("/api/"+os.Getenv("API_VERSION")+"/comment-pattern", middleware.AuthMiddleware(fooHandler))
-	http.Handle("/api/"+os.Getenv("API_VERSION")+"/modify-user", middleware.AuthMiddleware(fooHandler))
-	http.Handle("/api/"+os.Getenv("API_VERSION")+"/delete-user", middleware.AuthMiddleware(fooHandler))
-
-	http.HandleFunc("/bar", func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprintf(w, "Hello, %q", html.EscapeString(r.URL.Path))
-	})
+	http.HandleFunc("/api/"+os.Getenv("API_VERSION")+"/login", api.LoginRoute)
+	http.HandleFunc("/api/"+os.Getenv("API_VERSION")+"/registration", api.RegistrationRoute)
+	http.HandleFunc("/api/"+os.Getenv("API_VERSION")+"/upload-pattern", api.PatternUploadRoute)
+	http.HandleFunc("/api/"+os.Getenv("API_VERSION")+"/delete-pattern", api.PatternDeleteRoute)
+	http.HandleFunc("/api/"+os.Getenv("API_VERSION")+"/modify-pattern", api.PatternModifyRoute)
+	http.HandleFunc("/api/"+os.Getenv("API_VERSION")+"/comment-pattern", api.PatternCommentRoute)
+	http.HandleFunc("/api/"+os.Getenv("API_VERSION")+"/modify-user", api.UserModifyRoute)
+	http.HandleFunc("/api/"+os.Getenv("API_VERSION")+"/delete-user", api.UserDeleteRoute)
 
 	fmt.Printf("running on localhost:%s", os.Getenv("SERVER_PORT"))
 	log.Fatal(http.ListenAndServe(":"+os.Getenv("SERVER_PORT"), nil))
