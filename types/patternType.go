@@ -3,16 +3,16 @@ package types
 import "time"
 
 type Pattern struct {
-	Id                  string
-	Owner_id            string
-	Title               string
-	Pattern_description string
-	Gallery_paths       []string
-	Pattern_path        string
-	Materials           []string
-	Tools               []string
-	Category            string
-	CreatedAt           time.Time
+	Id                  string    // json patternId
+	Owner_id            string    // json patternOwnerId
+	Title               string    // json patternTitle
+	Pattern_description string    // json patternDescription
+	Gallery_paths       []string  // json patternGallery
+	Pattern_path        string    // json patternPath
+	Materials           []string  // json patternMaterials
+	Tools               []string  // json patternTools
+	Category            string    // json patternCategory
+	CreatedAt           time.Time // json patternCreationDate
 }
 
 // MATERIALS LIST:
