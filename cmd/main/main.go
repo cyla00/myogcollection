@@ -24,10 +24,11 @@ func main() {
 		log.Fatal("Error loading .env file")
 	}
 
-	_, db_conn_err := database.PsqlConnection(os.Getenv("DB_USER"), os.Getenv("DB_PWD"), os.Getenv("DB_NAME"), os.Getenv("DB_HOST"))
+	db, db_conn_err := database.PsqlConnection(os.Getenv("DB_USER"), os.Getenv("DB_PWD"), os.Getenv("DB_NAME"), os.Getenv("DB_HOST"))
 	if db_conn_err != nil {
 		fmt.Println("", db_conn_err)
 	}
+	*&db = *&api.DB
 	fmt.Println("database connected")
 
 	http.Handle("/patterns/", http.StripPrefix("/", http.FileServer(http.Dir("./patterns"))))
