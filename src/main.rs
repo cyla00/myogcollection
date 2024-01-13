@@ -8,16 +8,12 @@ use axum::{
 };
 
 use dotenv::dotenv;
+
+use sqlx::postgres::PgPoolOptions;
+use std::time::Duration;
+
 use std::env;
-
-use routes::get_index::index_page;
-use routes::get_login::login_page;
-use routes::get_signup::signup_page;
-use routes::post_login::login_route;
-use routes::post_signup::signup_route;
-
-use structs::{ User, Patern, Comment };
-use chrono::{ DateTime, Utc };
+use routes::*;
 
 #[tokio::main]
 async fn main() {
@@ -26,20 +22,22 @@ async fn main() {
     dotenv().ok();
     let port = env::var("SERVER_PORT").unwrap();
     let api_version = env::var("API_VERSION").unwrap();
-    let db_name = env::var("DB_NAME").unwrap();
-    let db_urs = env::var("DB_USR").unwrap();
-    let db_pwd = env::var("DB_PWD").unwrap();
-    let db_host = env::var("DB_HOST").unwrap();
-    let db_port = env::var("DB_PORT").unwrap();
+    let psql_url = env::var("PSQL_URL").unwrap();
 
-
+    let psql = PgPoolOptions::new()
+        .max_connections(5)
+        .acquire_timeout(Duration::from_secs(3))
+        .connect(&psql_url)
+        .await
+        .expect("can't connect to psql database");
 
     let app = Router::new()
-        .route("/", get(index_page))
-        .route("/signup", get(signup_page))
-        .route("/login", get(login_page))
-        .route(format!("/api/{}/signup", api_version).as_str(), get(signup_route))
-        .route(format!("/api/{}/login", api_version).as_str(), get(login_route));
+        .route("/", get(get_index::index_page))
+        .route("/signup", get(get_signup::signup_page))
+        .route("/login", get(get_login::login_page))
+        .route(format!("/api/{}/signup", api_version).as_str(), get(post_signup::signup_route))
+        .route(format!("/api/{}/login", api_version).as_str(), get(post_login::login_route))
+        .with_state(psql);
 
     
     let listener = tokio::net::TcpListener::bind(format!("0.0.0.0:{}", port)).await.unwrap();
