@@ -1,5 +1,6 @@
 use serde::{Deserialize, Serialize};
 use chrono::{ DateTime, Utc, Local };
+use sqlx::{postgres::PgPoolOptions, Postgres, Pool};
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct User {
@@ -32,4 +33,9 @@ pub struct Comment {
     pub pattern_id: String,
     pub comment: String,
     // pub created_at: DateTime<Utc>,
+}
+
+#[derive(Clone)]
+pub struct PsqlState {
+    pub psql: Pool<Postgres>,
 }
