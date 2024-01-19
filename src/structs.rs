@@ -1,3 +1,4 @@
+use redis::{Connection, Client};
 use serde::{Deserialize, Serialize};
 use chrono::{ DateTime, Utc, Local };
 use sqlx::{postgres::PgPoolOptions, Postgres, Pool};
@@ -35,7 +36,6 @@ pub struct Comment {
     // pub created_at: DateTime<Utc>,
 }
 
-#[derive(Clone)]
-pub struct PsqlState {
-    pub psql: Pool<Postgres>,
+pub struct RedisState {
+    pub redis: Connection
 }

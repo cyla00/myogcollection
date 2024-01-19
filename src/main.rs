@@ -54,15 +54,14 @@ async fn main() {
         .route("/signup", post(post_signup::signup_route))
         .route("/login", post(post_login::login_route));
 
-    let psql_state = structs::PsqlState { 
-        psql
+    let redis_state = structs::RedisState { 
+        redis
     };
     // API routes AUTH required
     let auth_api_routes = Router::new()
         .route("/create-pattern", post(post_pattern::create_pattern_route))
-        .route_layer(middleware::from_fn_with_state(psql_state.clone(), auth::auth_middleware))
-        .with_state(psql_state)
-        .with_state(Arc::new(redis));
+        .route_layer(middleware::from_fn_with_state(Arc::new(redis_state), auth::auth_middleware))
+        .with_state(psql);
         
 
     let routes = Router::new()
