@@ -9,8 +9,9 @@ pub struct User {
     pub username: String,
     pub email: String,
     pub password: String,
-    // pub created_at: DateTime<Local>,
     pub active: String,
+    pub created_at: DateTime<Local>,
+    pub last_login: DateTime<Local>,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -24,7 +25,7 @@ pub struct Patern {
     pub materials: Vec<(String, String)>,
     pub tools: Vec<(String, String)>,
     pub category: String,
-    // pub created_at: DateTime<Utc>,
+    pub created_at: DateTime<Utc>,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -33,7 +34,7 @@ pub struct Comment {
     pub owner_id: String,
     pub pattern_id: String,
     pub comment: String,
-    // pub created_at: DateTime<Utc>,
+    pub created_at: DateTime<Utc>,
 }
 
 pub struct RedisState {
