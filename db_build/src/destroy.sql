@@ -1,1 +1,1 @@
-DROP TABLE IF NOT EXISTS users, patterns, comments
+DROP TABLE IF EXISTS users, patterns, comments

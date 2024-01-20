@@ -408,10 +408,20 @@ dependencies = [
 [[package]]
 name = "db_build"
 version = "0.1.0"
+dependencies = [
+ "dotenv",
+ "sqlx",
+ "tokio",
+]
 
 [[package]]
 name = "db_destroy"
 version = "0.1.0"
+dependencies = [
+ "dotenv",
+ "sqlx",
+ "tokio",
+]
 
 [[package]]
 name = "db_seed"
