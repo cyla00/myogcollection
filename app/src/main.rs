@@ -1,7 +1,5 @@
 mod routes;
-mod structs;
 mod middlewares;
-
 
 #[allow(unused)]
 use axum::{
@@ -12,6 +10,7 @@ use axum::{
     extract::State
 };
 
+use datatypes::RedisState;
 use redis::{Client, Connection};
 use dotenv::dotenv;
 use middlewares::auth;
@@ -55,7 +54,7 @@ async fn main() {
         .route("/signup", post(post_signup::signup_route))
         .route("/login", post(post_login::login_route));
 
-    let redis_state: structs::RedisState = structs::RedisState { 
+    let redis_state: RedisState = RedisState { 
         redis
     };
 

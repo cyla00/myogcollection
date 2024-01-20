@@ -1,4 +1,4 @@
-use crate::structs::RedisState;
+use datatypes::RedisState;
 use axum::{
     http::StatusCode,
     response::Response,
@@ -6,8 +6,8 @@ use axum::{
     middleware::{self, Next}
 };
 use std::sync::Arc;
-use redis::Connection;
-use sqlx::{Pool, Postgres};
+// use redis::Connection;
+// use sqlx::{Pool, Postgres};
 
 pub async fn auth_middleware(State(redis): State<Arc<RedisState>>, req: Request, next: Next) -> Result<Response, StatusCode> {
     println!("middleware checked");
