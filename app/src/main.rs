@@ -1,5 +1,7 @@
 mod routes;
 mod middlewares;
+mod mailer;
+mod password_manager;
 
 #[allow(unused)]
 use axum::{
@@ -52,7 +54,8 @@ async fn main() {
     // API routes no AUTH
     let unauth_api_routes: Router = Router::new()
         .route("/signup", post(post_signup::signup_route))
-        .route("/login", post(post_login::login_route));
+        .route("/login", post(post_login::login_route))
+        .with_state(psql.clone());
 
     let redis_state: RedisState = RedisState { 
         redis

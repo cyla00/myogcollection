@@ -36,7 +36,22 @@ pub struct Comment {
     pub created_at: DateTime<Local>,
 }
 
-// #[derive(Clone)]
 pub struct RedisState {
     pub redis: Connection
+}
+
+#[derive(Serialize, Deserialize, Clone)]
+pub struct ErrMsgStruct {
+    pub err_msg: &'static str,
+}
+#[derive(Serialize, Deserialize, Clone)]
+pub struct SuccMsgStruct {
+    pub succ_msg: &'static str,
+}
+
+#[derive(Serialize, Deserialize, Clone)]
+pub struct RegistrationStruct {
+    pub username: String,
+    pub email: String,
+    pub password: String,
 }
