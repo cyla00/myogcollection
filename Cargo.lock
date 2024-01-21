@@ -308,6 +308,7 @@ dependencies = [
  "iana-time-zone",
  "js-sys",
  "num-traits",
+ "serde",
  "wasm-bindgen",
  "windows-targets 0.48.5",
 ]
@@ -426,6 +427,13 @@ dependencies = [
 [[package]]
 name = "db_seed"
 version = "0.1.0"
+dependencies = [
+ "chrono",
+ "datatypes",
+ "dotenv",
+ "sqlx",
+ "tokio",
+]
 
 [[package]]
 name = "der"
