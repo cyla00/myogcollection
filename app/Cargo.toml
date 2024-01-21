@@ -12,6 +12,7 @@ datatypes = { path = "../datatypes" }
 
 # net dependencies
 chrono = "0.4.31"
+argon2 = "0.5.3"
 axum = "0.7.3"
 tower = "0.4.13"
 tokio = { version = "1.35.1", features = ["full"] }

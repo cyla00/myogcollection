@@ -106,5 +106,5 @@ async fn main() {
     .bind(seed_comment.created_at)
     .execute(&psql).await.expect("error comment seed");
 
-    println!("db seed ok")
+    println!("db seeding ok")
 }
