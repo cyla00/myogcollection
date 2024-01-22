@@ -53,19 +53,18 @@ pub async fn signup_route(
         SELECT * FROM users WHERE username=$1;
     ").bind(&new_user.username).execute(&psql).await;
 
-    let email_check = sqlx::query("
-        SELECT * FROM users WHERE email=$1;
-    ").bind(&new_user.email).execute(&psql).await;
-
     match username_check {
         Ok(user) => {
-
             if user.rows_affected() != 0 {
                 let err_msg: ErrMsgStruct = ErrMsgStruct {
                     err_msg: "Username not available".to_string()
                 };
                 return (StatusCode::BAD_REQUEST, Err(Json(err_msg)))
             }
+
+            let email_check = sqlx::query("
+                SELECT * FROM users WHERE email=$1;
+            ").bind(&new_user.email).execute(&psql).await;
 
             match email_check {
                 Ok(user) => {
@@ -92,7 +91,7 @@ pub async fn signup_route(
                     match user_check {
                         Ok(_) => {
                             let succ_msg: SuccMsgStruct = SuccMsgStruct {
-                                succ_msg: "Successfully registered, check your email inbox to verify your account".to_string()
+                                succ_msg: "Successfully registered".to_string()
                             };
                             return (StatusCode::BAD_REQUEST, Ok(Json(succ_msg)))
                         }
