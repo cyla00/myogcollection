@@ -72,6 +72,7 @@ dependencies = [
  "datatypes",
  "dotenv",
  "lettre",
+ "log",
  "redis",
  "serde",
  "serde_json",

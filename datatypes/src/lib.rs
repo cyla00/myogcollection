@@ -10,7 +10,7 @@ pub struct User {
     pub password: String,
     pub active: bool,
     pub created_at: DateTime<Local>,
-    pub last_login: DateTime<Local>,
+    pub last_login: Option<DateTime<Local>>,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -42,11 +42,11 @@ pub struct RedisState {
 
 #[derive(Serialize, Deserialize, Clone)]
 pub struct ErrMsgStruct {
-    pub err_msg: &'static str,
+    pub err_msg: String,
 }
 #[derive(Serialize, Deserialize, Clone)]
 pub struct SuccMsgStruct {
-    pub succ_msg: &'static str,
+    pub succ_msg: String,
 }
 
 #[derive(Serialize, Deserialize, Clone)]

@@ -18,12 +18,12 @@ async fn main() {
     sqlx::query("
         CREATE TABLE IF NOT EXISTS users (
             id VARCHAR(200) NOT NULL UNIQUE,
-            username VARCHAR(200) NOT NULL,
-            email VARCHAR(200) NOT NULL,
+            username VARCHAR(200) NOT NULL UNIQUE,
+            email VARCHAR(200) NOT NULL UNIQUE,
             password VARCHAR(200) NOT NULL,
             active BOOLEAN NOT NULL,
             created_at TIMESTAMP NOT NULL,
-            last_login TIMESTAMP NOT NULL
+            last_login TIMESTAMP
         )
     ").execute(&psql).await.expect("error users table build");
 

@@ -6,10 +6,10 @@ use argon2::{
     Argon2
 };
 
-pub fn password_hashing(password: String) -> (String, SaltString) {
+pub fn password_hashing(password: String) -> String {
     let salt = SaltString::generate(&mut OsRng);
     let hashed_password = Argon2::default().hash_password(&password.as_bytes(), &salt).unwrap().to_string();
-    (hashed_password.to_string(), salt.clone())
+    hashed_password.to_string()
 }
 
 pub fn password_verification(old_password: String, new_password: String) -> bool {

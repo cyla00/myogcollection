@@ -42,7 +42,7 @@ async fn main() {
         password: "$argon2id$v=19$m=16,t=2,p=1$cGFzc3dvcmQ$8vDS3rsezOjrur01dF12EA".to_string(), // salt:"password" pwd:"password" (argon2)
         active: false,
         created_at: time,
-        last_login: time,
+        last_login: Some(time),
     };
 
     let seed_pattern: Pattern = Pattern {
