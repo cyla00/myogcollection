@@ -12,7 +12,7 @@ use axum::{
     extract::State
 };
 
-use datatypes::RedisState;
+use datatypes::AppState;
 use redis::{Client, Connection};
 use dotenv::dotenv;
 use middlewares::auth;
@@ -44,6 +44,7 @@ async fn main() {
     
     let redis_client: Client = redis::Client::open(redis_url).expect("Failed to create Redis client");
     let redis: Connection = redis_client.get_connection().expect("Failed to connect redis");
+    let redis = Arc::new(redis);
 
     // template GET routes
     let template_routes: Router = Router::new()
@@ -51,21 +52,20 @@ async fn main() {
         .route("/signup", get(get_signup::signup_page))
         .route("/login", get(get_login::login_page));
 
+    
     // API routes no AUTH
     let unauth_api_routes: Router = Router::new()
         .route("/signup", post(post_signup::signup_route))
         .route("/login", post(post_login::login_route))
-        .with_state(psql.clone());
+        .with_state(Arc::new(AppState { redis: Arc::clone(&redis), psql: psql.clone() }));
 
-    let redis_state: RedisState = RedisState { 
-        redis
-    };
+
 
     // API routes AUTH required
     let auth_api_routes: Router = Router::new()
         .route("/create-pattern", post(post_pattern::create_pattern_route))
-        .route_layer(middleware::from_fn_with_state(Arc::new(redis_state), auth::auth_middleware))
-        .with_state(psql);
+        // .route_layer(middleware::from_fn_with_state(Arc::new(AppState { redis: Arc::clone(&redis), psql: psql.clone() }), auth::auth_middleware))
+        .with_state(Arc::new(AppState { redis: Arc::clone(&redis), psql: psql.clone() }));
 
     // API endpoints nesting
     let routes: Router = Router::new()

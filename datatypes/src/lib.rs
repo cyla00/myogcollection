@@ -1,6 +1,8 @@
 use redis::Connection;
 use serde::{Deserialize, Serialize};
 use chrono::{DateTime, Local};
+use std::sync::Arc;
+use sqlx::{Pool, Postgres};
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct User {
@@ -36,17 +38,18 @@ pub struct Comment {
     pub created_at: DateTime<Local>,
 }
 
-pub struct RedisState {
-    pub redis: Connection
+pub struct AppState {
+    pub redis: Arc<Connection>,
+    pub psql: Pool<Postgres>,
 }
 
 #[derive(Serialize, Deserialize, Clone)]
 pub struct ErrMsgStruct {
-    pub err_msg: String,
+    pub err_msg: &'static str,
 }
 #[derive(Serialize, Deserialize, Clone)]
 pub struct SuccMsgStruct {
-    pub succ_msg: String,
+    pub succ_msg: &'static str,
 }
 
 #[derive(Serialize, Deserialize, Clone)]

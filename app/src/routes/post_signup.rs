@@ -1,4 +1,4 @@
-
+use redis::Connection;
 use axum::{
     http::StatusCode, 
     Json, 
@@ -10,29 +10,28 @@ use common_regex_rs::{is_email, is_good_password};
 use chrono::Local;
 use uuid::Uuid;
 use crate::password_manager::password_hashing;
-use log;
 
 pub async fn signup_route(
-    State(psql): State<Pool<Postgres>>, 
+    State((_redis, psql)): State<(Connection, Pool<Postgres>)>, 
     Json(body): Json<RegistrationStruct>) -> (StatusCode, Result<Json<SuccMsgStruct>, Json<ErrMsgStruct>>) {
     
     if body.email.is_empty() | !is_email(&body.email) {
         let err_msg: ErrMsgStruct = ErrMsgStruct {
-            err_msg: "Provide a valid email".to_string()
+            err_msg: "Provide a valid email"
         };
         return (StatusCode::BAD_REQUEST, Err(Json(err_msg)))
     }
 
     if body.username.is_empty() {
         let err_msg: ErrMsgStruct = ErrMsgStruct {
-            err_msg: "Provide a valid username".to_string()
+            err_msg: "Provide a valid username"
         };
         return (StatusCode::BAD_REQUEST, Err(Json(err_msg)))
     }
 
     if body.password.is_empty() || !is_good_password(&body.password) {
         let err_msg: ErrMsgStruct = ErrMsgStruct {
-            err_msg: "Provide a stronger password".to_string()
+            err_msg: "Provide a stronger password"
         };
         return (StatusCode::BAD_REQUEST, Err(Json(err_msg)))
     }
@@ -57,7 +56,7 @@ pub async fn signup_route(
         Ok(user) => {
             if user.rows_affected() != 0 {
                 let err_msg: ErrMsgStruct = ErrMsgStruct {
-                    err_msg: "Username not available".to_string()
+                    err_msg: "Username not available"
                 };
                 return (StatusCode::BAD_REQUEST, Err(Json(err_msg)))
             }
@@ -70,7 +69,7 @@ pub async fn signup_route(
                 Ok(user) => {
                     if user.rows_affected() != 0 {
                         let err_msg: ErrMsgStruct = ErrMsgStruct {
-                            err_msg: "An account with that email exists".to_string()
+                            err_msg: "An account with that email exists"
                         };
                         return (StatusCode::BAD_REQUEST, Err(Json(err_msg)))
                     }
@@ -91,14 +90,14 @@ pub async fn signup_route(
                     match user_check {
                         Ok(_) => {
                             let succ_msg: SuccMsgStruct = SuccMsgStruct {
-                                succ_msg: "Successfully registered".to_string()
+                                succ_msg: "Successfully registered"
                             };
                             return (StatusCode::BAD_REQUEST, Ok(Json(succ_msg)))
                         }
                         Err(err) => {
                             println!("{err:?}");
                             let err_msg: ErrMsgStruct = ErrMsgStruct {
-                                err_msg: "An error occurred, retry later".to_string()
+                                err_msg: "An error occurred, retry later"
                             };
                             return (StatusCode::BAD_GATEWAY, Err(Json(err_msg)))
                         }
@@ -107,7 +106,7 @@ pub async fn signup_route(
                 Err(err) => {
                     println!("{err:?}");
                     let err_msg: ErrMsgStruct = ErrMsgStruct {
-                        err_msg: "An error occurred, retry later".to_string()
+                        err_msg: "An error occurred, retry later"
                     };
                     return (StatusCode::BAD_GATEWAY, Err(Json(err_msg)))
                 }
@@ -116,7 +115,7 @@ pub async fn signup_route(
         Err(err) => {
             println!("{err:?}");
             let err_msg: ErrMsgStruct = ErrMsgStruct {
-                err_msg: "An error occurred, retry later".to_string()
+                err_msg: "An error occurred, retry later"
             };
             return (StatusCode::BAD_GATEWAY, Err(Json(err_msg)))
         }

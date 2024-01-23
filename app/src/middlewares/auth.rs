@@ -1,4 +1,4 @@
-use datatypes::RedisState;
+use datatypes::AppState;
 use axum::{
     http::StatusCode,
     response::Response,
@@ -6,12 +6,12 @@ use axum::{
     middleware::{self, Next}
 };
 use std::sync::Arc;
-// use redis::Connection;
-// use sqlx::{Pool, Postgres};
+use redis::Connection;
+use sqlx::{Pool, Postgres};
 
-pub async fn auth_middleware(State(redis): State<Arc<RedisState>>, req: Request, next: Next) -> Result<Response, StatusCode> {
-    println!("middleware checked");
+// pub async fn auth_middleware(State((redis, psql)): State<(Arc<Connection>, Pool<Postgres>)>, req: Request, next: Next) -> Result<Response, StatusCode> {
+//     println!("middleware checked");
 
-    // Ok(next.run(req).await)
-    Err(StatusCode::UNAUTHORIZED)
-}
+//     // Ok(next.run(req).await)
+//     Err(StatusCode::UNAUTHORIZED)
+// }
