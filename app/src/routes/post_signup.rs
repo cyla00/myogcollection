@@ -10,9 +10,10 @@ use common_regex_rs::{is_email, is_good_password};
 use chrono::Local;
 use uuid::Uuid;
 use crate::password_manager::password_hashing;
+use std::sync::Arc;
 
 pub async fn signup_route(
-    State((_redis, psql)): State<(Connection, Pool<Postgres>)>, 
+    State((_redis, psql)): State<(Arc<Connection>, Pool<Postgres>)>, 
     Json(body): Json<RegistrationStruct>) -> (StatusCode, Result<Json<SuccMsgStruct>, Json<ErrMsgStruct>>) {
     
     if body.email.is_empty() | !is_email(&body.email) {

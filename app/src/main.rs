@@ -12,7 +12,6 @@ use axum::{
     extract::State
 };
 
-use datatypes::AppState;
 use redis::{Client, Connection};
 use dotenv::dotenv;
 use middlewares::auth;
@@ -57,15 +56,15 @@ async fn main() {
     let unauth_api_routes: Router = Router::new()
         .route("/signup", post(post_signup::signup_route))
         .route("/login", post(post_login::login_route))
-        .with_state(Arc::new(AppState { redis: Arc::clone(&redis), psql: psql.clone() }));
+        .with_state((Arc::clone(&redis), psql.clone()));
 
 
 
     // API routes AUTH required
     let auth_api_routes: Router = Router::new()
         .route("/create-pattern", post(post_pattern::create_pattern_route))
-        // .route_layer(middleware::from_fn_with_state(Arc::new(AppState { redis: Arc::clone(&redis), psql: psql.clone() }), auth::auth_middleware))
-        .with_state(Arc::new(AppState { redis: Arc::clone(&redis), psql: psql.clone() }));
+        .route_layer(middleware::from_fn_with_state(Arc::clone(&redis), auth::auth_middleware))
+        .with_state((Arc::clone(&redis), psql.clone()));
 
     // API endpoints nesting
     let routes: Router = Router::new()

@@ -15,7 +15,7 @@ use uuid::Uuid;
 
 
 pub async fn login_route(
-    State((mut redis, psql)): State<(Connection, Pool<Postgres>)>,
+    State((redis, psql)): State<(Arc<Connection>, Pool<Postgres>)>,
     TypedHeader(auth): TypedHeader<Authorization<Basic>>
 ) -> (StatusCode, Result<Json<SuccMsgStruct>, Json<ErrMsgStruct>>) {
 
@@ -39,18 +39,18 @@ pub async fn login_route(
                 return (StatusCode::UNAUTHORIZED, Err(Json(err_msg)))
             }
 
-            redis.set("sessionid", Uuid::new_v4().to_string());
+            // let test: Result<String, RedisError> = redis.set("sessionid", Uuid::new_v4().to_string());
 
-            let ok: Result<String, RedisError> = redis.get("my_key");
+            // let ok: Result<String, RedisError> = redis.get("my_key");
 
-            match ok {
-                Ok(key) => {
-                    println!("{key:?}");
-                }
-                Err(err) => {
-                    println!("{err:?}");
-                }
-            }
+            // match ok {
+            //     Ok(key) => {
+            //         println!("{key:?}");
+            //     }
+            //     Err(err) => {
+            //         println!("{err:?}");
+            //     }
+            // }
             
             let succ_msg: SuccMsgStruct = SuccMsgStruct {
                 succ_msg: "success"

@@ -38,11 +38,6 @@ pub struct Comment {
     pub created_at: DateTime<Local>,
 }
 
-pub struct AppState {
-    pub redis: Arc<Connection>,
-    pub psql: Pool<Postgres>,
-}
-
 #[derive(Serialize, Deserialize, Clone)]
 pub struct ErrMsgStruct {
     pub err_msg: &'static str,
