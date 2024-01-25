@@ -4,7 +4,7 @@ use axum::{
     extract::State,
 };
 use redis::{Commands, Connection, RedisError};
-use std::sync::{Arc, Mutex};
+use std::{collections::HashMap, sync::{Arc, Mutex}};
 use axum_extra::{headers::{authorization::Basic, Authorization}, TypedHeader};
 use datatypes::{ErrMsgStruct, SuccMsgStruct};
 use sqlx::{
@@ -12,6 +12,8 @@ use sqlx::{
 };
 use crate::password_manager::password_verification;
 use uuid::Uuid;
+use aes::Aes128;
+use chrono::Local;
 
 
 pub async fn login_route(
@@ -22,7 +24,7 @@ pub async fn login_route(
     let (auth_password, auth_email) = (auth.password(), auth.username());
     
     let check_password_query = sqlx::query("
-        SELECT password FROM users WHERE email=$1;
+        SELECT * FROM users WHERE email=$1;
     ")
     .bind(auth_email)
     .fetch_one(&psql).await;
@@ -30,6 +32,9 @@ pub async fn login_route(
     match check_password_query {
         Ok(user) => {
             let fetched_password:String = user.get("password"); 
+            let fetched_id:String = user.get("id"); 
+            let now = Local::now();
+            let timestamp = now.timestamp();
 
             let password_check = password_verification(fetched_password, auth_password.to_string());
             if !password_check {
@@ -39,18 +44,26 @@ pub async fn login_route(
                 return (StatusCode::UNAUTHORIZED, Err(Json(err_msg)))
             }
 
-            let test: Result<String, RedisError> = redis.lock().unwrap().set("sessionid", Uuid::new_v4().to_string());
+            // create session id using user ID, timestamp, generated ID
+            // encrypt session id using AES + key
+            // check it against existing session IDs
 
-            let ok: Result<String, RedisError> = redis.lock().unwrap().get("sessionid");
+            let test: Result<String, RedisError> = redis.lock().unwrap().hset(fetched_id, "id", "sessionId");
 
-            match ok {
-                Ok(key) => {
-                    println!("{key:?}");
-                }
-                Err(err) => {
-                    println!("{err:?}");
-                }
-            }
+            // let test: Result<String, RedisError> = redis.lock().unwrap().set("sessionid", Uuid::new_v4().to_string());
+
+            // let ok: Result<String, RedisError> = redis.lock().unwrap().get("sessionid");
+
+            // match ok {
+            //     Ok(key) => {
+            //         println!("{key:?}");
+            //     }
+            //     Err(err) => {
+            //         println!("{err:?}");
+            //     }
+            // }
+            println!("{fetched_id:?}");
+            println!("{timestamp:?}");
             
             let succ_msg: SuccMsgStruct = SuccMsgStruct {
                 succ_msg: "success"
