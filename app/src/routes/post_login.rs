@@ -62,8 +62,6 @@ pub async fn login_route(
             //         println!("{err:?}");
             //     }
             // }
-            println!("{fetched_id:?}");
-            println!("{timestamp:?}");
             
             let succ_msg: SuccMsgStruct = SuccMsgStruct {
                 succ_msg: "success"

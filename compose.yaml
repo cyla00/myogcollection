@@ -1,0 +1,22 @@
+services:
+  # master:
+  #   build: .  
+  #   depends_on:
+  #     db:
+  #       condition: service_healthy
+  db:
+    image: postgres
+    restart: always
+    ports:
+    - 5432:5432
+    environment:
+      POSTGRES_DB: myog_db
+      POSTGRES_PASSWORD: password
+      POSTGRES_USER: myog_admin
+    volumes:
+      - ./sqls/docker_build_db.sql:/docker-entrypoint-initdb.d/docker_build_db.sql
+    healthcheck:
+      test: “CMD-SHELL pg_isready"
+      interval: 1s
+      timeout: 5s
+      retries: 10
