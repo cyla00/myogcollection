@@ -4,7 +4,7 @@ use axum::{
     extract::State,
 };
 use redis::{Commands, Connection, RedisError};
-use std::sync::Arc;
+use std::sync::{Arc, Mutex};
 use axum_extra::{headers::{authorization::Basic, Authorization}, TypedHeader};
 use datatypes::{ErrMsgStruct, SuccMsgStruct};
 use sqlx::{
@@ -15,7 +15,7 @@ use uuid::Uuid;
 
 
 pub async fn login_route(
-    State((redis, psql)): State<(Arc<Connection>, Pool<Postgres>)>,
+    State((redis, psql)): State<(Arc<Mutex<Connection>>, Pool<Postgres>)>,
     TypedHeader(auth): TypedHeader<Authorization<Basic>>
 ) -> (StatusCode, Result<Json<SuccMsgStruct>, Json<ErrMsgStruct>>) {
 
@@ -31,7 +31,7 @@ pub async fn login_route(
         Ok(user) => {
             let fetched_password:String = user.get("password"); 
 
-            let password_check = password_verification(auth_password.to_string(), fetched_password);
+            let password_check = password_verification(fetched_password, auth_password.to_string());
             if !password_check {
                 let err_msg: ErrMsgStruct = ErrMsgStruct {
                     err_msg: "Incorrect crendentials"
@@ -39,18 +39,18 @@ pub async fn login_route(
                 return (StatusCode::UNAUTHORIZED, Err(Json(err_msg)))
             }
 
-            // let test: Result<String, RedisError> = redis.set("sessionid", Uuid::new_v4().to_string());
+            let test: Result<String, RedisError> = redis.lock().unwrap().set("sessionid", Uuid::new_v4().to_string());
 
-            // let ok: Result<String, RedisError> = redis.get("my_key");
+            let ok: Result<String, RedisError> = redis.lock().unwrap().get("sessionid");
 
-            // match ok {
-            //     Ok(key) => {
-            //         println!("{key:?}");
-            //     }
-            //     Err(err) => {
-            //         println!("{err:?}");
-            //     }
-            // }
+            match ok {
+                Ok(key) => {
+                    println!("{key:?}");
+                }
+                Err(err) => {
+                    println!("{err:?}");
+                }
+            }
             
             let succ_msg: SuccMsgStruct = SuccMsgStruct {
                 succ_msg: "success"
@@ -58,11 +58,10 @@ pub async fn login_route(
             return (StatusCode::OK, Ok(Json(succ_msg)))
         }
         Err(err) => {
-            println!("{err:?}");
             let err_msg: ErrMsgStruct = ErrMsgStruct {
-                err_msg: "An error occurred, retry later"
+                err_msg: "Incorrect crendentials"
             };
-            return (StatusCode::BAD_GATEWAY, Err(Json(err_msg)))
+            return (StatusCode::UNAUTHORIZED, Err(Json(err_msg)))
         }
     }
 }

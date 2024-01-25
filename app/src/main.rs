@@ -18,8 +18,7 @@ use middlewares::auth;
 use sqlx::{postgres::PgPoolOptions, Pool, Postgres};
 use tokio::net::TcpListener;
 use std::{
-    time::Duration,
-    sync::Arc
+    cell::RefCell, sync::{Arc, Mutex}, time::Duration
 };
 use std::env;
 use routes::*;
@@ -43,7 +42,7 @@ async fn main() {
     
     let redis_client: Client = redis::Client::open(redis_url).expect("Failed to create Redis client");
     let redis: Connection = redis_client.get_connection().expect("Failed to connect redis");
-    let redis = Arc::new(redis);
+    let redis = Arc::new(Mutex::new(redis));
 
     // template GET routes
     let template_routes: Router = Router::new()
@@ -51,7 +50,7 @@ async fn main() {
         .route("/signup", get(get_signup::signup_page))
         .route("/login", get(get_login::login_page));
 
-    
+
     // API routes no AUTH
     let unauth_api_routes: Router = Router::new()
         .route("/signup", post(post_signup::signup_route))
