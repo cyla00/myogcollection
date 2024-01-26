@@ -1,11 +1,7 @@
 services:
-  # master:
-  #   build: .  
-  #   depends_on:
-  #     db:
-  #       condition: service_healthy
-  db:
-    image: postgres
+
+  postgres:
+    image: postgres:latest
     restart: always
     ports:
     - 5432:5432
@@ -20,3 +16,19 @@ services:
       interval: 1s
       timeout: 5s
       retries: 10
+  
+  redis:
+    image: redis:latest
+    restart: always
+    ports:
+      - 6379:6379
+    environment:
+      - ALLOW_EMPTY_PASSWORD=no
+      - REDIS_PASSWORD=redispassword
+      - REDIS_PORT=6379
+      - REDIS_DATABASE=3
+    healthcheck:
+      test: [ 'CMD', 'redis-cli', 'ping' ]
+      interval: 30s
+      timeout: 10s
+      retries: 3

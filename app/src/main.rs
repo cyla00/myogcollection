@@ -18,7 +18,7 @@ use middlewares::auth;
 use sqlx::{postgres::PgPoolOptions, Pool, Postgres};
 use tokio::net::TcpListener;
 use std::{
-    cell::RefCell, sync::{Arc, Mutex}, time::Duration
+    sync::{Arc, Mutex}, time::Duration
 };
 use std::env;
 use routes::*;

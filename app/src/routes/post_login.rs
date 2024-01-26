@@ -23,14 +23,23 @@ pub async fn login_route(
 
     let (auth_password, auth_email) = (auth.password(), auth.username());
     
-    let check_password_query = sqlx::query("
+    let check_user = sqlx::query("
         SELECT * FROM users WHERE email=$1;
     ")
     .bind(auth_email)
     .fetch_one(&psql).await;
 
-    match check_password_query {
+    match check_user {
         Ok(user) => {
+
+            let active: bool = user.get("active");
+            if !active {
+                let err_msg: ErrMsgStruct = ErrMsgStruct {
+                    err_msg: "Verify your email before connecting"
+                };
+                return (StatusCode::UNAUTHORIZED, Err(Json(err_msg)))
+            }
+
             let fetched_password:String = user.get("password"); 
             let fetched_id:String = user.get("id"); 
             let now = Local::now();
@@ -64,13 +73,14 @@ pub async fn login_route(
             // }
             
             let succ_msg: SuccMsgStruct = SuccMsgStruct {
-                succ_msg: "success"
+                succ_msg: "success",
+                token: None
             };
             return (StatusCode::OK, Ok(Json(succ_msg)))
         }
         Err(err) => {
             let err_msg: ErrMsgStruct = ErrMsgStruct {
-                err_msg: "Incorrect crendentials"
+                err_msg: "Incorrect credentials"
             };
             return (StatusCode::UNAUTHORIZED, Err(Json(err_msg)))
         }

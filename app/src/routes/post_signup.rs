@@ -44,7 +44,7 @@ pub async fn signup_route(
         username: body.username,
         email: body.email,
         password: hashed_pass.clone(),
-        active: false,
+        active: true, // false to enable email verification
         created_at: Local::now(),
         last_login: None,
     };
@@ -70,7 +70,7 @@ pub async fn signup_route(
                 Ok(user) => {
                     if user.rows_affected() != 0 {
                         let err_msg: ErrMsgStruct = ErrMsgStruct {
-                            err_msg: "An account with that email exists"
+                            err_msg: "This account already exists"
                         };
                         return (StatusCode::BAD_REQUEST, Err(Json(err_msg)))
                     }
@@ -91,7 +91,8 @@ pub async fn signup_route(
                     match user_check {
                         Ok(_) => {
                             let succ_msg: SuccMsgStruct = SuccMsgStruct {
-                                succ_msg: "Successfully registered"
+                                succ_msg: "Successfully registered",
+                                token: None
                             };
                             return (StatusCode::BAD_REQUEST, Ok(Json(succ_msg)))
                         }

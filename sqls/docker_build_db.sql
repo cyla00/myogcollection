@@ -1,5 +1,6 @@
 CREATE TABLE IF NOT EXISTS users (
-    id VARCHAR(40) NOT NULL UNIQUE,
+    id VARCHAR(40) NOT NULL UNIQUE PRIMARY KEY,
+    hash VARCHAR(40) NOT NULL UNIQUE,
     username VARCHAR(200) NOT NULL UNIQUE,
     email VARCHAR(200) NOT NULL UNIQUE,
     password VARCHAR(200) NOT NULL,
@@ -10,7 +11,7 @@ CREATE TABLE IF NOT EXISTS users (
 
 
 CREATE TABLE IF NOT EXISTS patterns (
-    id VARCHAR(40) NOT NULL UNIQUE,
+    id VARCHAR(40) NOT NULL UNIQUE PRIMARY KEY,
     owner_id VARCHAR(40) NOT NULL,
     title VARCHAR(100) NOT NULL,
     pattern_description VARCHAR(500) NOT NULL,
@@ -24,7 +25,7 @@ CREATE TABLE IF NOT EXISTS patterns (
 
 
 CREATE TABLE IF NOT EXISTS comments (
-    id VARCHAR(40) NOT NULL UNIQUE,
+    id VARCHAR(40) NOT NULL UNIQUE PRIMARY KEY,
     owner_id VARCHAR(40) NOT NULL,
     pattern_id VARCHAR(40) NOT NULL,
     comment VARCHAR(500) NOT NULL,
@@ -32,13 +33,14 @@ CREATE TABLE IF NOT EXISTS comments (
 );
 
 
-INSERT INTO users(id, username, email, password, active) 
+INSERT INTO users(id, hash, username, email, password, active) 
 VALUES (
     'bbf2aed1-368d-4d14-b64d-c9a18a4f50d8',
+    'eed78034-7533-49a1-9726-10b60041a376',
     'username',
     'ikhayam000@protonmail.com',
     '$argon2id$v=19$m=16,t=2,p=1$cGFzc3dvcmQ$8vDS3rsezOjrur01dF12EA', -- salt:'password' pwd:'password' (argon2)
-    false
+    true
 ) ON CONFLICT (id) DO NOTHING;
 
 
@@ -48,7 +50,7 @@ VALUES (
     'bbf2aed1-368d-4d14-b64d-c9a18a4f50d8',
     'plate carrier',
     'this is a pattern for a minimal platecarrier',
-    '{"/gallerey/img1.jpeg", "/gallerey/img2.jpeg", "/gallerey/img3.jpeg"}',
+    '{"/gallery/img1.jpeg", "/gallery/img2.jpeg", "/gallery/img3.jpeg"}',
     '/patterns/pattern.pdf',
     '{"cordura", "cotton", "velcro"}',
     '{"machine", "scissors", "thread"}',

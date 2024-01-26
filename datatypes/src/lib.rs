@@ -45,6 +45,7 @@ pub struct ErrMsgStruct {
 #[derive(Serialize, Deserialize, Clone)]
 pub struct SuccMsgStruct {
     pub succ_msg: &'static str,
+    pub token: Option<&'static str>
 }
 
 #[derive(Serialize, Deserialize, Clone)]
