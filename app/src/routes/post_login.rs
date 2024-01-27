@@ -1,24 +1,37 @@
+// takes body: "system_info", "ip"
+// takes headers: Basic auth
+
 use axum::{
     Json, 
     http::StatusCode,
     extract::State,
 };
 use redis::{Commands, Connection, RedisError};
-use std::{collections::HashMap, sync::{Arc, Mutex}};
-use axum_extra::{headers::{authorization::Basic, Authorization}, TypedHeader};
-use datatypes::{ErrMsgStruct, SuccMsgStruct};
+use std::sync::{Arc, Mutex};
+use axum_extra::{
+    extract::cookie::{CookieJar, Cookie},
+    headers::{
+        authorization::Basic, Authorization
+    }, 
+    TypedHeader,
+};
+use datatypes::{ErrMsgStruct, SuccMsgStruct, LoginBodyInformation};
 use sqlx::{
     Pool, Postgres, Row
 };
 use crate::password_manager::password_verification;
 use uuid::Uuid;
-use aes::Aes128;
 use chrono::Local;
+use ipgeolocate::{Locator, Service};
+use dotenv::dotenv;
+use std::env;
 
 
 pub async fn login_route(
     State((redis, psql)): State<(Arc<Mutex<Connection>>, Pool<Postgres>)>,
-    TypedHeader(auth): TypedHeader<Authorization<Basic>>
+    TypedHeader(auth): TypedHeader<Authorization<Basic>>,
+    jar: CookieJar,
+    Json(body): Json<LoginBodyInformation>
 ) -> (StatusCode, Result<Json<SuccMsgStruct>, Json<ErrMsgStruct>>) {
 
     let (auth_password, auth_email) = (auth.password(), auth.username());
@@ -42,8 +55,6 @@ pub async fn login_route(
 
             let fetched_password:String = user.get("password"); 
             let fetched_id:String = user.get("id"); 
-            let now = Local::now();
-            let timestamp = now.timestamp();
 
             let password_check = password_verification(fetched_password, auth_password.to_string());
             if !password_check {
@@ -53,32 +64,56 @@ pub async fn login_route(
                 return (StatusCode::UNAUTHORIZED, Err(Json(err_msg)))
             }
 
-            // create session id using user ID, timestamp, generated ID
-            // encrypt session id using AES + key
-            // check it against existing session IDs
+            let new_session_key = Uuid::new_v4().to_string();
+            let service = Service::IpApi;
+            match Locator::get(&body.ip, service).await {
+                Ok(geolocation) => {
+                    let set_session: Result<Vec<()>, RedisError> = redis.lock().unwrap()
+                        .hset_multiple(&new_session_key, &[
+                            ("owner_id", &fetched_id),
+                            ("system", &body.system_info),
+                            ("ip", &body.ip),
+                            ("geolocation", &format!("{}, {}", geolocation.city, &geolocation.country)),
+                            ("created_at", &Local::now().to_string())
+                        ]);
 
-            let test: Result<String, RedisError> = redis.lock().unwrap().hset(fetched_id, "id", "sessionId");
 
-            // let test: Result<String, RedisError> = redis.lock().unwrap().set("sessionid", Uuid::new_v4().to_string());
+                    dotenv().ok();
+                    let redis_session_expiration_time: String = env::var("REDIS_SESSION_EXPIRATION_TIME").unwrap();
+                    let set_expiration: Result<i64, RedisError> = redis.lock().unwrap().expire(&new_session_key, redis_session_expiration_time.parse().unwrap());
 
-            // let ok: Result<String, RedisError> = redis.lock().unwrap().get("sessionid");
+                    let _ = jar.add(Cookie::new("session_id", new_session_key));
 
-            // match ok {
-            //     Ok(key) => {
-            //         println!("{key:?}");
-            //     }
-            //     Err(err) => {
-            //         println!("{err:?}");
-            //     }
-            // }
-            
-            let succ_msg: SuccMsgStruct = SuccMsgStruct {
-                succ_msg: "success",
-                token: None
+                    match (set_session, set_expiration) {
+                        (Ok(set), Ok(exp)) => {
+                            println!("{set:?}");
+                            println!("{exp:?}");
+                            println!("{geolocation:?}");
+                            
+                            let succ_msg: SuccMsgStruct = SuccMsgStruct {
+                                succ_msg: "Successfully connected",
+                            };
+                            return (StatusCode::OK, Ok(Json(succ_msg)))
+                        }
+                        (Err(err), _) | (_, Err(err))    => {
+                            println!("{err:?}");
+                            let err_msg: ErrMsgStruct = ErrMsgStruct {
+                                err_msg: "An error occurred, please retry later"
+                            };
+                            return (StatusCode::BAD_GATEWAY, Err(Json(err_msg)))
+                        }
+                    }
+                }
+                Err(err) => {
+                    println!("{err:?}");
+                    let err_msg: ErrMsgStruct = ErrMsgStruct {
+                        err_msg: "Please reconnect in a few minutes"
+                    };
+                    return (StatusCode::UNAUTHORIZED, Err(Json(err_msg)))
+                }
             };
-            return (StatusCode::OK, Ok(Json(succ_msg)))
         }
-        Err(err) => {
+        Err(_) => {
             let err_msg: ErrMsgStruct = ErrMsgStruct {
                 err_msg: "Incorrect credentials"
             };

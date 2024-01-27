@@ -14,7 +14,8 @@ use std::sync::{Arc, Mutex};
 
 pub async fn signup_route(
     State((_redis, psql)): State<(Arc<Mutex<Connection>>, Pool<Postgres>)>, 
-    Json(body): Json<RegistrationStruct>) -> (StatusCode, Result<Json<SuccMsgStruct>, Json<ErrMsgStruct>>) {
+    Json(body): Json<RegistrationStruct>
+) -> (StatusCode, Result<Json<SuccMsgStruct>, Json<ErrMsgStruct>>) {
     
     if body.email.is_empty() | !is_email(&body.email) {
         let err_msg: ErrMsgStruct = ErrMsgStruct {
@@ -91,8 +92,7 @@ pub async fn signup_route(
                     match user_check {
                         Ok(_) => {
                             let succ_msg: SuccMsgStruct = SuccMsgStruct {
-                                succ_msg: "Successfully registered",
-                                token: None
+                                succ_msg: "Successfully registered"
                             };
                             return (StatusCode::BAD_REQUEST, Ok(Json(succ_msg)))
                         }

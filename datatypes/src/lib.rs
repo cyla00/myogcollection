@@ -16,6 +16,12 @@ pub struct User {
 }
 
 #[derive(Serialize, Deserialize, Debug)]
+pub struct LoginBodyInformation {
+    pub system_info: String,
+    pub ip: String,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
 pub struct Pattern {
     pub id: String,
     pub owner_id: String,
@@ -45,7 +51,6 @@ pub struct ErrMsgStruct {
 #[derive(Serialize, Deserialize, Clone)]
 pub struct SuccMsgStruct {
     pub succ_msg: &'static str,
-    pub token: Option<&'static str>
 }
 
 #[derive(Serialize, Deserialize, Clone)]

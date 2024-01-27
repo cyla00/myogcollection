@@ -26,7 +26,6 @@ services:
       - ALLOW_EMPTY_PASSWORD=no
       - REDIS_PASSWORD=redispassword
       - REDIS_PORT=6379
-      - REDIS_DATABASE=3
     healthcheck:
       test: [ 'CMD', 'redis-cli', 'ping' ]
       interval: 30s

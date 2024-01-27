@@ -13,13 +13,13 @@ use axum::{
 };
 
 use redis::{Client, Connection};
-use dotenv::dotenv;
 use middlewares::auth;
 use sqlx::{postgres::PgPoolOptions, Pool, Postgres};
 use tokio::net::TcpListener;
 use std::{
     sync::{Arc, Mutex}, time::Duration
 };
+use dotenv::dotenv;
 use std::env;
 use routes::*;
 

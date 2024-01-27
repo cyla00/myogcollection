@@ -1,1 +1,1 @@
-cargo run -p app
+cargo watch -x run -p app
