@@ -4,8 +4,8 @@
 process large printable PDFs in A4 format.
 
 ## stack
-Rust Axum
-Docker
-Postgres
-Redis
-Argon2
+- Rust Axum
+- Docker
+- Postgres
+- Redis
+- Argon2
