@@ -6,7 +6,7 @@ use axum::{
     http::StatusCode,
     extract::State,
 };
-use redis::{Commands, Connection, RedisError};
+use redis::{Commands, Connection, RedisError, RedisResult};
 use std::sync::{Arc, Mutex};
 use axum_extra::{
     extract::cookie::{CookieJar, Cookie},
@@ -68,7 +68,7 @@ pub async fn login_route(
             let service = Service::IpApi;
             match Locator::get(&body.ip, service).await {
                 Ok(geolocation) => {
-                    let set_session: Result<Vec<()>, RedisError> = redis.lock().unwrap()
+                    let set_session: RedisResult<String> = redis.lock().unwrap()
                         .hset_multiple(&new_session_key, &[
                             ("owner_id", &fetched_id),
                             ("system", &body.system_info),
@@ -79,23 +79,19 @@ pub async fn login_route(
 
 
                     dotenv().ok();
-                    let redis_session_expiration_time: String = env::var("REDIS_SESSION_EXPIRATION_TIME").unwrap();
-                    let set_expiration: Result<i64, RedisError> = redis.lock().unwrap().expire(&new_session_key, redis_session_expiration_time.parse().unwrap());
 
-                    let _ = jar.add(Cookie::new("session_id", new_session_key));
+                    // let _ = jar.add(Cookie::new("session_id", new_session_key));
 
-                    match (set_session, set_expiration) {
-                        (Ok(set), Ok(exp)) => {
-                            println!("{set:?}");
-                            println!("{exp:?}");
-                            println!("{geolocation:?}");
+                    match set_session {
+                        Ok(ok) => {
+                            println!("{ok:?}");
                             
                             let succ_msg: SuccMsgStruct = SuccMsgStruct {
                                 succ_msg: "Successfully connected",
                             };
                             return (StatusCode::OK, Ok(Json(succ_msg)))
                         }
-                        (Err(err), _) | (_, Err(err))    => {
+                        Err(err)   => {
                             println!("{err:?}");
                             let err_msg: ErrMsgStruct = ErrMsgStruct {
                                 err_msg: "An error occurred, please retry later"

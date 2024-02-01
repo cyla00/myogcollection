@@ -4,6 +4,17 @@ use chrono::{DateTime, Local};
 use std::sync::Arc;
 use sqlx::{Pool, Postgres};
 
+// SYSTEM DATA
+#[derive(Serialize, Deserialize, Clone)]
+pub struct ErrMsgStruct {
+    pub err_msg: &'static str,
+}
+#[derive(Serialize, Deserialize, Clone)]
+pub struct SuccMsgStruct {
+    pub succ_msg: &'static str,
+}
+
+// USER DATA
 #[derive(Serialize, Deserialize, Debug)]
 pub struct User {
     pub id: String,
@@ -21,6 +32,15 @@ pub struct LoginBodyInformation {
     pub ip: String,
 }
 
+#[derive(Serialize, Deserialize, Clone)]
+pub struct RegistrationStruct {
+    pub username: String,
+    pub email: String,
+    pub password: String,
+}
+
+
+// PATTERN DATA
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Pattern {
     pub id: String,
@@ -35,6 +55,8 @@ pub struct Pattern {
     pub created_at: DateTime<Local>,
 }
 
+
+// COMMENT DATA
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Comment {
     pub id: String,
@@ -44,18 +66,3 @@ pub struct Comment {
     pub created_at: DateTime<Local>,
 }
 
-#[derive(Serialize, Deserialize, Clone)]
-pub struct ErrMsgStruct {
-    pub err_msg: &'static str,
-}
-#[derive(Serialize, Deserialize, Clone)]
-pub struct SuccMsgStruct {
-    pub succ_msg: &'static str,
-}
-
-#[derive(Serialize, Deserialize, Clone)]
-pub struct RegistrationStruct {
-    pub username: String,
-    pub email: String,
-    pub password: String,
-}
