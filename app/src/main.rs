@@ -5,13 +5,12 @@ mod password_manager;
 
 #[allow(unused)]
 use axum::{
-    routing::{get, post},
+    routing::{get_service, {get, post}},
     http::StatusCode,
     Json, Router,
     middleware::{self, Next},
-    extract::State
+    extract::State,
 };
-
 use redis::{Client, Connection};
 use middlewares::auth;
 use sqlx::{postgres::PgPoolOptions, Pool, Postgres};
@@ -19,6 +18,7 @@ use tokio::net::TcpListener;
 use std::{
     sync::{Arc, Mutex}, time::Duration
 };
+use tower_http::services::ServeDir;
 use dotenv::dotenv;
 use std::env;
 use routes::*;
@@ -72,6 +72,8 @@ async fn main() {
         .nest(format!("/api/{}", api_version).as_str(), auth_api_routes);
 
     let app: Router = Router::new()
+        // .nest_service("/patterns", get_service(ServeDir::new("./patterns")))
+        // .nest_service("/gallery", get_service(ServeDir::new("./gallery")))
         .nest("/", routes);
         
     
