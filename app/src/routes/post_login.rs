@@ -7,21 +7,21 @@ use axum::{
     extract::State,
 };
 use redis::{Commands, Connection, RedisError, RedisResult};
-use std::sync::{Arc, Mutex};
+use std::{collections::HashMap, sync::{Arc, Mutex}};
 use axum_extra::{
     extract::cookie::{CookieJar, Cookie},
     headers::{
-        authorization::Basic, Authorization
+        authorization::Basic, Authorization, Date
     }, 
     TypedHeader,
 };
-use datatypes::{ErrMsgStruct, SuccMsgStruct, LoginBodyInformation};
+use datatypes::{ErrMsgStruct, SuccMsgStruct, LoginBodyInformation, SessionStruct};
 use sqlx::{
     Pool, Postgres, Row
 };
 use crate::password_manager::password_verification;
 use uuid::Uuid;
-use chrono::Local;
+use chrono::{DateTime, Local};
 use ipgeolocate::{Locator, Service};
 use dotenv::dotenv;
 use std::env;
@@ -64,37 +64,30 @@ pub async fn login_route(
                 return (StatusCode::UNAUTHORIZED, Err(Json(err_msg)))
             }
 
-            let new_session_key = Uuid::new_v4().to_string();
+            let update_login = sqlx::query("UPDATE users SET last_login=$1 WHERE id=$2;")
+                .bind(Local::now())
+                .bind(&fetched_id)
+                .execute(&psql).await;
+
             let service = Service::IpApi;
-            match Locator::get(&body.ip, service).await {
-                Ok(geolocation) => {
-                    let set_session: RedisResult<String> = redis.lock().unwrap()
-                        .hset_multiple(&new_session_key, &[
-                            ("owner_id", &fetched_id),
-                            ("system", &body.system_info),
-                            ("ip", &body.ip),
-                            ("geolocation", &format!("{}, {}", geolocation.city, &geolocation.country)),
-                            ("created_at", &Local::now().to_string())
-                        ]);
-
-
-                    dotenv().ok();
-
-                    // let _ = jar.add(Cookie::new("session_id", new_session_key));
-
-                    match set_session {
-                        Ok(ok) => {
-                            println!("{ok:?}");
+            match update_login {
+                Ok(_) => {
+                    // check session existence, if exist => return session key else create new session
+                    let get_session: RedisResult<Vec<(String, String)>> = redis.lock().unwrap().hgetall(&fetched_id);
+                    match get_session {
+                        Ok(existent_session) => {
+                            println!("{:?}", existent_session);
                             
                             let succ_msg: SuccMsgStruct = SuccMsgStruct {
-                                succ_msg: "Successfully connected",
+                                succ_msg: "OK",
                             };
                             return (StatusCode::OK, Ok(Json(succ_msg)))
                         }
-                        Err(err)   => {
+                        
+                        Err(err) => {
                             println!("{err:?}");
                             let err_msg: ErrMsgStruct = ErrMsgStruct {
-                                err_msg: "An error occurred, please retry later"
+                                err_msg: "session no exist"
                             };
                             return (StatusCode::BAD_GATEWAY, Err(Json(err_msg)))
                         }
@@ -103,11 +96,52 @@ pub async fn login_route(
                 Err(err) => {
                     println!("{err:?}");
                     let err_msg: ErrMsgStruct = ErrMsgStruct {
-                        err_msg: "Please reconnect in a few minutes"
+                        err_msg: "An error occurred, please retry later"
                     };
-                    return (StatusCode::UNAUTHORIZED, Err(Json(err_msg)))
+                    return (StatusCode::BAD_GATEWAY, Err(Json(err_msg)))
                 }
-            };
+            }
+
+            // match Locator::get(&body.ip, service).await {
+            //     Ok(geolocation) => {
+            //         let set_session: RedisResult<String> = redis.lock().unwrap()
+            //             .hset_multiple(&fetched_id, &[
+            //                 ("system", &body.system_info),
+            //                 ("ip", &body.ip),
+            //                 ("geolocation", &format!("{}, {}", geolocation.city, &geolocation.country)),
+            //                 ("created_at", &Local::now().to_string())
+            //             ]);
+
+            //         // let _ = jar.add(Cookie::new("session_id", &fetched_id));
+                    
+            //         match set_session {
+            //             Ok(ok) => {
+            //                 println!("{ok:?}");
+                            
+            //                 let succ_msg: SuccMsgStruct = SuccMsgStruct {
+            //                     succ_msg: "Successfully connected",
+            //                 };
+            //                 return (StatusCode::OK, Ok(Json(succ_msg)))
+            //             }
+            //             Err(err)   => {
+            //                 println!("{err:?}");
+            //                 let err_msg: ErrMsgStruct = ErrMsgStruct {
+            //                     err_msg: "An error occurred, please retry later"
+            //                 };
+            //                 return (StatusCode::BAD_GATEWAY, Err(Json(err_msg)))
+            //             }
+            //         }
+            //     }
+            //     Err(err) => {
+            //         println!("{err:?}");
+            //         let err_msg: ErrMsgStruct = ErrMsgStruct {
+            //             err_msg: "An error occurred, please retry later"
+            //         };
+            //         return (StatusCode::UNAUTHORIZED, Err(Json(err_msg)))
+            //     }
+            // };
+
+            
         }
         Err(_) => {
             let err_msg: ErrMsgStruct = ErrMsgStruct {

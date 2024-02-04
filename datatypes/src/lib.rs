@@ -39,6 +39,14 @@ pub struct RegistrationStruct {
     pub password: String,
 }
 
+#[derive(Serialize, Deserialize, Clone)]
+pub struct SessionStruct {
+    pub system: String,
+    pub ip: String,
+    pub geolocation: String,
+    pub created_at: DateTime<Local>
+}
+
 
 // PATTERN DATA
 #[derive(Serialize, Deserialize, Debug)]

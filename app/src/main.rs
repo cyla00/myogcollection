@@ -73,7 +73,7 @@ async fn main() {
 
     let app: Router = Router::new()
         // .nest_service("/patterns", get_service(ServeDir::new("./patterns")))
-        // .nest_service("/gallery", get_service(ServeDir::new("./gallery"))) statis
+        // .nest_service("/gallery", get_service(ServeDir::new("./gallery")))
         .nest("/", routes);
         
     
